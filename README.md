@@ -99,7 +99,7 @@ market-risk-var-cvar/
 │   └── prices.csv              # Daily ETF prices (date, ticker, adj_close)
 │
 ├── notebooks/
-│   └── 01_market_risk_var_cvar.ipynb
+│   └── market_risk_var_cvar.ipynb
 │
 ├── README.md                   # Project overview, methodology, results
 └── requirements.txt            # Python dependencies
