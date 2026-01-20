@@ -91,6 +91,8 @@ For robust market-risk assessment, VaR and CVaR should be complemented with **st
 ---
 
 ### Project Structure
+
+```text
 market-risk-var-cvar/
 │
 ├── data/
@@ -101,3 +103,4 @@ market-risk-var-cvar/
 │
 ├── README.md                   # Project overview, methodology, results
 └── requirements.txt            # Python dependencies
+```
