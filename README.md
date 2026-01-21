@@ -52,13 +52,13 @@ Saved dataset:
 1. Download daily prices for the selected ETFs.
 2. Compute **daily arithmetic returns** per asset.
 3. Compute portfolio daily return:
-   \[
-   R_{p,t} = \sum_i w_i R_{i,t}
-   \]
+
+   `R_p,t = Σ_i w_i · R_i,t`
+
 4. Convert returns to **losses**:
-   \[
-   L_t = -R_{p,t}
-   \]
+
+   `L_t = − R_p,t`
+
 5. Estimate Historical risk measures:
    - **VaR (α)**: α-quantile of the loss distribution  
    - **CVaR (α)**: average loss conditional on losses exceeding VaR
