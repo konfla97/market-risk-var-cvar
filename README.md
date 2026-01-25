@@ -1,67 +1,64 @@
-### Market Risk Case Study: Historical VaR & CVaR (ETF Portfolio)
+## Market Risk Case Study: Historical VaR, CVaR & Backtesting (ETF Portfolio)
 
-### Objective
-Estimate **1-day market risk** for a diversified ETF portfolio using **Historical Value at Risk (VaR)** and **Conditional Value at Risk (CVaR / Expected Shortfall)**.  
-This project is designed as a practical market-risk case study with clear assumptions, reproducible code, and transparent risk interpretation.
+## Objective
+Estimate and validate **1-day market risk** for a diversified ETF portfolio using:
+
+- **Historical Value at Risk (VaR)**
+- **Conditional Value at Risk (CVaR / Expected Shortfall)**
+- **Stress testing**
+- **Formal VaR backtesting**
+
+This project is designed as a **practical market-risk case study**, emphasizing transparent assumptions,
+reproducible analysis, and industry-standard validation techniques.
 
 ---
 
-### Business Questions
+## Business Questions
 1. What is the portfolio’s **1-day 95% and 99% VaR**?
-2. What is the portfolio’s **Expected Shortfall (CVaR)** beyond VaR?
-3. How do tail-risk measures compare to the **worst historical outcomes**?
-4. How would the portfolio behave under **stress scenarios**? *(next step)*
+2. How severe are losses **beyond VaR** (CVaR)?
+3. How does the portfolio behave under **extreme historical stress events**?
+4. Is the VaR model **statistically reliable** when backtested?
 
 ---
 
-### Portfolio
-ETFs used (multi-asset diversification):
+## Portfolio
+Multi-asset ETF portfolio with fixed weights:
 
-- **SPY** (S&P 500 / US equities)
-- **QQQ** (NASDAQ / growth equities)
-- **IWM** (Russell 2000 / small caps)
-- **TLT** (US Treasuries / duration exposure)
-- **GLD** (Gold)
-- **HYG** (High-yield credit)
-
-Weights (fixed, static):
-
-| Ticker | Weight |
-|-------:|-------:|
-| SPY | 0.20 |
-| QQQ | 0.20 |
-| IWM | 0.15 |
-| TLT | 0.20 |
-| GLD | 0.15 |
-| HYG | 0.10 |
+| Ticker | Asset Class | Weight |
+|------:|-------------|-------:|
+| SPY | US Equities (S&P 500) | 0.20 |
+| QQQ | US Growth Equities | 0.20 |
+| IWM | US Small Caps | 0.15 |
+| TLT | US Treasuries | 0.20 |
+| GLD | Gold | 0.15 |
+| HYG | High-Yield Credit | 0.10 |
 
 ---
 
-### Data
-- Source: **Stooq** (daily prices)
-- Frequency: **Daily**
-- Period: from **2015-01-01** to most recent available date
-- Price field used: daily **Close** (stored as `adj_close`)
+## Data
+- **Source:** Stooq
+- **Frequency:** Daily
+- **Period:** 2015-01-01 → most recent available date
+- **Price field:** Close (stored as `adj_close`)
 
 Saved dataset:
 - `data/prices.csv` with columns: `date`, `ticker`, `adj_close`
 
 ---
 
-### Methodology
-1. Download daily prices for the selected ETFs.
-2. Compute **daily arithmetic returns** per asset.
-3. Compute portfolio daily return:
+## Methodology
+1. Compute **daily arithmetic returns** for each ETF.
+2. Construct portfolio daily return:
 
    `R_p,t = Σ_i w_i · R_i,t`
 
-4. Convert returns to **losses**:
+3. Convert returns to **losses**:
 
    `L_t = − R_p,t`
 
-5. Estimate Historical risk measures:
-   - **VaR (α)**: α-quantile of the loss distribution  
-   - **CVaR (α)**: average loss conditional on losses exceeding VaR
+4. Estimate historical risk measures:
+   - **VaR (α):** α-quantile of the loss distribution
+   - **CVaR (α):** average loss conditional on losses exceeding VaR
 
 Confidence levels:
 - **95%**
@@ -69,160 +66,117 @@ Confidence levels:
 
 ---
 
-### Results (Historical)
-Based on the historical loss distribution, the estimated risk measures are:
+## Historical Risk Results
+Estimated from the full historical loss distribution:
 
-- **Historical 95% VaR:** ~ **1.09%**
-- **Historical 95% CVaR:** ~ **1.75%**
-- **Historical 99% VaR:** ~ **1.97%**
-- **Historical 99% CVaR:** ~ **2.98%**
+- **95% VaR:** ~ **1.09%**
+- **95% CVaR:** ~ **1.75%**
+- **99% VaR:** ~ **1.97%**
+- **99% CVaR:** ~ **2.98%**
 
-Interpretation:
+**Interpretation:**
 - VaR represents a **loss threshold**, not a worst-case outcome.
 - CVaR is materially larger than VaR, indicating **meaningful tail risk**.
 - Extreme historical losses exceed VaR, highlighting the limitations of threshold-based risk measures.
 
 ---
 
-### Discussion
-Historical VaR is intuitive and assumption-free but **backward-looking** and dependent on the chosen sample period.  
-For robust market-risk assessment, VaR and CVaR should be complemented with **stress testing** and scenario analysis.
-
----
-
-### Stress Testing & Scenario Analysis
-
-Historical VaR and CVaR quantify tail risk under *normal market conditions*, but they do not fully capture portfolio behavior during **extreme or persistent stress events**.  
-To address this limitation, we complement VaR/CVaR with **historical stress testing** based on realized market crises and policy shocks.
-
-The following stress tests are considered:
-
----
+## Stress Testing
+Stress tests complement VaR by examining portfolio behavior under **extreme but plausible scenarios**.
 
 ### Stress Test A — Worst Historical Single-Day Shocks
+- Identification of the worst historical daily portfolio losses.
+- Decomposition of losses by asset contribution.
+- Worst single-day loss observed: **~6.28%** (March 2020).
 
-This stress test identifies the **worst single-day portfolio losses** observed in the historical sample.
-
-Procedure:
-- Rank portfolio daily losses from largest to smallest
-- Inspect the top worst-loss days
-- Decompose the worst day into **asset-level contributions**
-
-Key findings:
-- The worst historical day occurred on **2020-03-12** (COVID market panic)
-- Portfolio loss on that day: **6.28%**
-- Losses were driven primarily by equity ETFs (SPY, QQQ, IWM)
-- Defensive assets (TLT, GLD) partially offset equity losses but could not prevent a large drawdown
-
-This analysis highlights that **VaR thresholds can be breached during crisis days**, reinforcing the need for stress testing.
-
----
-
-### Stress Test B — COVID Crisis Window (Multi-Day Systemic Stress)
-
-This scenario evaluates portfolio performance during the **COVID market crisis**, capturing the effect of *persistent losses over multiple days* rather than a single shock.
-
-Stress window:
-- February–March 2020 (COVID-driven market selloff)
-
-Metrics evaluated:
-- Worst single-day loss
-- Cumulative portfolio return
-- Maximum drawdown (peak-to-trough)
-
-Results:
-- Worst daily loss: **6.28%**
-- Cumulative return: **−12.33%**
+### Stress Test B — COVID Crisis (Multi-Day Systemic Stress)
+- Window: **February–April 2020**
+- Cumulative portfolio return: **−12.33%**
 - Maximum drawdown: **−20.26%**
+- Worst single-day loss during window: **6.28%**
 
-Interpretation:
-- Although the worst daily loss matches the historical worst day, cumulative losses were substantially larger
-- Drawdown continued to deepen after the initial shock due to consecutive negative returns
-- This demonstrates that **path dependency and recovery dynamics** are critical components of risk
-
-COVID illustrates a **systemic stress regime** where losses compound over time.
-
----
+This scenario highlights the importance of **path dependency**, where losses persist beyond the initial shock.
 
 ### Stress Test C — Tariff Shock (April 2025 Policy Event)
-
-This scenario examines a **policy-driven stress event** following the announcement of new US trade tariffs in early April 2025.
-
-Stress window:
-- **2025-04-02 to 2025-04-10**
-
-Metrics evaluated:
-- Worst single-day loss
-- Cumulative portfolio return
-- Maximum drawdown
-
-Results:
-- Worst daily loss: **3.36%**
-- Cumulative return: **−4.75%**
+- Window: **2025-04-02 → 2025-04-10**
+- Cumulative portfolio return: **−4.75%**
 - Maximum drawdown: **−8.76%**
+- Worst daily loss: **3.36%**
 
-Interpretation:
-- The tariff shock produced smaller losses than the COVID crisis
-- Losses were spread across several days rather than concentrated in a single crash
-- Partial recoveries occurred within the window, limiting drawdown depth
-
-This scenario reflects **event-driven risk**, which is typically less severe than systemic crises but still material.
+This represents a **policy-driven stress regime**, materially less severe than systemic crises.
 
 ---
 
-### Stress Scenario Comparison
+## Stress Test Comparison
 
-| Scenario | Worst daily loss | Cumulative return | Maximum drawdown |
-|--------|-----------------|-------------------|------------------|
+| Scenario | Worst Daily Loss | Cumulative Return | Maximum Drawdown |
+|--------|----------------:|------------------:|-----------------:|
 | Historical worst (single day) | 6.28% | −6.28% | 6.28% |
 | COVID crisis window | 6.28% | −12.33% | −20.26% |
 | Tariff shock (Apr 2025) | 3.36% | −4.75% | −8.76% |
 
-Key insights:
-- **Worst daily loss alone does not capture total risk**
-- Systemic crises (COVID) cause significantly larger drawdowns than isolated shocks
-- Policy-driven shocks are meaningful but less destructive than global crises
-- VaR captures threshold risk, while stress testing reveals **loss persistence and recovery risk**
+**Key insight:**  
+VaR captures **single-day tail risk**, while stress testing reveals **loss persistence and drawdown risk**.
 
 ---
 
-### Risk Management Implications
+## VaR Backtesting
+The Historical VaR model is evaluated using **out-of-sample backtesting**.
 
-- VaR and CVaR should be interpreted as **baseline risk measures**
-- Stress testing is essential to understand portfolio behavior under extreme conditions
-- Maximum drawdown provides critical insight into **capital erosion and investor survivability**
-- Combining VaR, CVaR, and stress testing yields a **more complete risk framework**
+### Violation Rates
 
+| VaR Level | Observations | Violations | Violation Rate | Expected Rate |
+|---------|-------------:|-----------:|---------------:|--------------:|
+| 95% | 2776 | 140 | 5.04% | 5.00% |
+| 99% | 2776 | 28 | 1.01% | 1.00% |
+
+### Kupiec Proportion of Failures Test
+
+| VaR Level | LR Statistic | p-value |
+|---------|-------------:|--------:|
+| 95% | 0.0109 | 0.9169 |
+| 99% | 0.0021 | 0.9635 |
+
+**Interpretation:**
+- Violation frequencies are statistically consistent with model assumptions.
+- High p-values indicate **no rejection** of correct VaR coverage.
+- The Historical VaR model is **well-calibrated** at both confidence levels.
+
+### VaR Violation Timeline (Visual Sanity Check)
+
+The figure below shows daily portfolio losses together with the 95% and 99% Historical VaR thresholds.
+Violations are rare and concentrated during known stress periods, supporting model robustness.
+
+![VaR Violation Timeline](figures/var_violation_timeline.png)
 
 ---
+## Requirements
 
-### Project Structure
----
+This project was developed using **Python 3** and the following libraries:
 
-### Project Structure
+- **pandas** — data manipulation and time-series analysis  
+- **numpy** — numerical computations  
+- **matplotlib** — data visualization  
+- **scipy** — statistical tests (Kupiec test)
 
+All analysis was performed using **Jupyter Notebooks**.
+
+## Project Structure
 ```text
 market-risk-var-cvar/
 │
 ├── data/
 │   └── prices.csv
-│       # Daily ETF prices
-│       # Columns: date, ticker, adj_close
+│                  # Daily ETF prices
+├── figures/
+│   └── var_violation_timeline.png   # VaR backtesting visualization
 │
 ├── notebook/
-│   ├── market_risk_var_cvar.ipynb
-│   │   # Historical VaR & CVaR estimation
-│   │   # Portfolio construction and baseline risk analysis
-│   │
-│   └── stress_testing.ipynb
-│       # Stress Test A: Worst historical single-day shocks
-│       # Stress Test B: COVID crisis (multi-day systemic stress)
-│       # Stress Test C: Tariff shock (April 2025 policy event)
-│       # Drawdowns, cumulative returns, and scenario comparison
+│   ├── market_risk_var_cvar.ipynb   # VaR & CVaR estimation
+│   ├── stress_testing.ipynb         # Historical, COVID & tariff stress tests
+│   └── var_backtesting.ipynb        # VaR violations & Kupiec test
 │
-├── README.md
-│   # Project overview, methodology, results, and interpretation
 │
-└── requirements.txt
-│   # Python dependencies (pandas, numpy, matplotlib, etc.)
+├── README.md                        # Project documentation
+
 
